@@ -37,6 +37,7 @@ class closed_forward_diffusion(nn.Module):
         """
         batch_bar_alpha_ts = self.bar_alpha[t]
         batch_means = torch.sqrt(batch_bar_alpha_ts).view(t.shape[0], 1, 1, 1) * x_0
+        assert len(batch_means.shape) == 4
         ##they use a multivariate normal with covariance as scaled identity matrix
         ##this is equivalent to an individual guassian for each pixel, i.e. zero covariance
         ##just make sure you input the std, not the variance into the univariate distribution
