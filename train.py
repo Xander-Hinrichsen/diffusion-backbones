@@ -9,7 +9,6 @@ import wandb
 ##dataset/visualization 
 import torchvision
 import torchvision.transforms as tfs
-import matplotlib.pyplot as plt
 import numpy as np
 
 ##my algos
@@ -54,7 +53,7 @@ for epoch in range(epochs):
 
         ##sample timesteps of shape (b)
         t = torch.randint(0, 1000, (x_0.shape[0],))
-        t.to(device)
+        t = t.to(device)
 
         ##use closed formula forward diffusion
         ##x_t is our input, epsilon is our label

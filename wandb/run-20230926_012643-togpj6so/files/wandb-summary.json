@@ -1,0 +1,1 @@
+{"epochs": 10000, "lr": 0.0002, "batch_size": 128, "T": 1000, "beta_schedule": "1e-4 to 0.02", "_timestamp": 1695716805.753238, "_runtime": 2.12066388130188, "_step": 0, "_wandb": {"runtime": 0}}

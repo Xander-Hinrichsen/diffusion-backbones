@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 63, in <module>
+    preds = model(x_t, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 78, in forward
+    s = self.encodeS(xb, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 33, in forward
+    return self.network(xb) + self.resid_connector(xb)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 63, in <module>
+    preds = model(x_t, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 78, in forward
+    s = self.encodeS(xb, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 33, in forward
+    return self.network(xb) + self.resid_connector(xb)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+KeyboardInterrupt

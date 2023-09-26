@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 63, in <module>
+    preds = model(x_t, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 74, in forward
+    b = self.encodeB(xb, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 31, in forward
+    time_embedding = self.time_projector(self.pos_encoder(t, self.time_dim)).view(t.shape[0],self.in_channels,1,1)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 114, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat1 in method wrapper_CUDA_addmm)
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 63, in <module>
+    preds = model(x_t, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 74, in forward
+    b = self.encodeB(xb, t)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/architecture/Unet.py", line 31, in forward
+    time_embedding = self.time_projector(self.pos_encoder(t, self.time_dim)).view(t.shape[0],self.in_channels,1,1)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 114, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat1 in method wrapper_CUDA_addmm)
