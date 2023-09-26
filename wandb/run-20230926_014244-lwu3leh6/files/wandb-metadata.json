@@ -1,0 +1,88 @@
+{
+    "os": "Linux-6.2.0-33-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12",
+    "heartbeatAt": "2023-09-26T08:42:47.470577",
+    "startedAt": "2023-09-26T08:42:44.462305",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "train.py",
+    "git": {
+        "remote": "https://github.com/Xander-Hinrichsen/ddpm-vanilla.git",
+        "commit": "d738c0345ce8e9753dea147779abb3757e5c00de"
+    },
+    "email": "xhinrichsen@ucsd.edu",
+    "root": "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla",
+    "host": "xander",
+    "username": "xander",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 4018.171,
+        "min": 800.0,
+        "max": 4200.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4001.918,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 4014.758,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 4027.099,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 4002.658,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 4001.132,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 4000.005,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 3999.987,
+            "min": 800.0,
+            "max": 4200.0
+        },
+        {
+            "current": 3998.43,
+            "min": 800.0,
+            "max": 4200.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 915.3213348388672,
+            "used": 101.9508171081543
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4090",
+            "memory_total": 25757220864
+        }
+    ],
+    "memory": {
+        "total": 31.286762237548828
+    }
+}

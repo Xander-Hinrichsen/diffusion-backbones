@@ -102,12 +102,13 @@ class UNet(nn.Module):
             curr_x = dist.sample().to(device)
             for i in range(t)[::-1]:
                 z = dist.sample().to(device)
-                sigma = 0
+                var = 0
                 if i!=0 and probabilistic:
                     if upper_bound:
-                        sigma = self.beta_sched[i]
+                        var = self.beta_sched[i]
                     else:
-                        sigma = ((1-self.bar_alpha_sched[i-1])/(1-self.bar_alpha_sched[i]))*self.beta_sched[i]
+                        var = ((1-self.bar_alpha_sched[i-1])/(1-self.bar_alpha_sched[i]))*self.beta_sched[i]
+                sigma = torch.sqrt(var)
 
                 curr_x = (1/torch.sqrt(self.alpha_sched[i]) * 
                           (curr_x - (((1-self.alpha_sched[i])/(torch.sqrt(1-self.bar_alpha_sched[i])))* self.forward(curr_x, torch.tensor([i]).to(device).repeat(num_imgs))))) + (sigma*z)

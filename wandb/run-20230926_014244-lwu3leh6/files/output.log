@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 69, in <module>
+    optim.step()
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 280, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 33, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 141, in step
+    adam(
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 281, in adam
+    func(params,
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 439, in _multi_tensor_adam
+    torch._foreach_add_(device_state_steps, 1)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 69, in <module>
+    optim.step()
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 280, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 33, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 141, in step
+    adam(
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 281, in adam
+    func(params,
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 439, in _multi_tensor_adam
+    torch._foreach_add_(device_state_steps, 1)
+KeyboardInterrupt
