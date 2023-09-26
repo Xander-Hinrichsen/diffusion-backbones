@@ -42,9 +42,10 @@ class Upsampler(nn.Module):
         return self.Upsampler(xb)
 
 class UNet(nn.Module):
-    def __init__(self):
+    def __init__(self, T=1000):
         super().__init__()
-        self.beta_sched, self.alpha_sched, self.bar_alpha_sched = get_ddpm_schedules()
+        self.T = T
+        self.beta_sched, self.alpha_sched, self.bar_alpha_sched = get_ddpm_schedules(T=self.T)
         ##ENCODER instance vars     beta_sched, alpha_sched, bar_alpha_sched      #32x32
         self.encodeB = ResBlock(3,64,64)   
         self.MaxPoolB = nn.MaxPool2d(2)   #16x16
@@ -88,22 +89,24 @@ class UNet(nn.Module):
         xb = self.decodeB(torch.cat((b,xb), dim=1), t)
         return self.to_img(xb)
 
-    def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
+    def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, probabilistic=True,
+                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
         self.to(device)
+        self.eval()
         self.bar_alpha_sched.to(device)
         self.alpha_sched.to(device)
         with torch.no_grad():
-            dist = Normal(torch.zeros(num_imgs, res[0], res[1]), torch.ones(num_imgs, res[0], res[1]))
+            dist = Normal(torch.zeros(num_imgs, 3, res[0], res[1]), torch.ones(num_imgs, 3, res[0], res[1]))
             curr_x = dist.sample().to(device)
             for i in range(t)[::-1]:
                 z = dist.sample().to(device)
                 sigma = 0
-                if i!=0:
+                if i!=0 and probabilistic:
                     if upper_bound:
                         sigma = self.beta_sched[i]
                     else:
                         sigma = ((1-self.bar_alpha_sched[i-1])/(1-self.bar_alpha_sched[i]))*self.beta_sched[i]
 
                 curr_x = (1/torch.sqrt(self.alpha_sched[i]) * 
-                          (curr_x - (((1-self.alpha_sched[i])/(torch.sqrt(1-self.bar_alha_sched[i])))*self(curr_x, t)) )) + (sigma*z)
+                          (curr_x - (((1-self.alpha_sched[i])/(torch.sqrt(1-self.bar_alpha_sched[i])))* self.forward(curr_x, torch.tensor([i]).to(device).repeat(num_imgs))))) + (sigma*z)
             return curr_x

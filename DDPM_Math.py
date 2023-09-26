@@ -4,7 +4,7 @@ import torch.nn as nn
 
 def get_ddpm_schedules(T=1000):
     """ Returns beta_sched, alpha_sched, bar_alpha_sched
-        as described by vanilla ddpm paper, following exactly
+        as described by vanilla ddpm paper, followed exactly
     """
     beta_sched = torch.linspace(0.0001, 0.02, T)
     alpha_sched = 1 - beta_sched
@@ -48,7 +48,7 @@ class closed_forward_diffusion(nn.Module):
         dist = Normal(torch.zeros_like(batch_means), torch.ones_like(batch_means))
         epsilon  = dist.sample()
 
-        assert(epsilon.shape == batch_stds.shape, 'epsilon noise and batch_stds shape mismatch')
+        assert epsilon.shape == batch_stds.shape
 
         x_t = batch_means + (batch_stds*epsilon)
 
