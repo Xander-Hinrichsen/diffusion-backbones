@@ -73,7 +73,7 @@ for epoch in range(epochs):
         torch.cuda.empty_cache()
     
     loss_per_epoch.append(np.mean(epoch_loss))
-    wandb.log({"epoch " + str(epoch) + " loss": loss_per_epoch[epoch]})
+    wandb.log({"epoch loss": loss_per_epoch[epoch]})
 
     ##evaluate model
     model.eval()
@@ -81,6 +81,6 @@ for epoch in range(epochs):
     mantage_img = unroll_samples(sample_time_list)
     ##convert from torch [-1,1] to Image [0,255]
     wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
-    wandb.log({"epoch " + str(epoch) + " rollout": wandb.Image(wandb_friendly_img)})
+    wandb.log({"epoch rollout": wandb.Image(wandb_friendly_img)})
     if epoch % 20 == 0:
         torch.save(model.state_dict(), "trained_models/epoch" + str(epoch) + ".pth")

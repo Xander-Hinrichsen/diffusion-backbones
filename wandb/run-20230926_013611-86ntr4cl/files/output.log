@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 69, in <module>
+    optim.step()
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 280, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 33, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 141, in step
+    adam(
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 281, in adam
+    func(params,
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 425, in _multi_tensor_adam
+    grouped_tensors = _group_tensors_by_device_and_dtype([params, grads, exp_avgs, exp_avg_sqs, max_exp_avg_sqs, state_steps])
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/utils/_foreach_utils.py", line 33, in _group_tensors_by_device_and_dtype
+    per_device_and_dtype_tensors[key][j].append(tensorlistlist[j][i])
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 69, in <module>
+    optim.step()
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 280, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/optimizer.py", line 33, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 141, in step
+    adam(
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 281, in adam
+    func(params,
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/optim/adam.py", line 425, in _multi_tensor_adam
+    grouped_tensors = _group_tensors_by_device_and_dtype([params, grads, exp_avgs, exp_avg_sqs, max_exp_avg_sqs, state_steps])
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xander/.local/lib/python3.10/site-packages/torch/utils/_foreach_utils.py", line 33, in _group_tensors_by_device_and_dtype
+    per_device_and_dtype_tensors[key][j].append(tensorlistlist[j][i])
+KeyboardInterrupt
