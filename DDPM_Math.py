@@ -20,7 +20,7 @@ class closed_forward_diffusion(nn.Module):
     def __init__(self, bar_alpha, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
         super().__init__()
         self.bar_alpha = bar_alpha
-        self.bar_alpha.to(device)
+        self.bar_alpha = self.bar_alpha.to(device)
         self.device = device
     def forward(self, x_0, t):
         """ 
@@ -46,7 +46,7 @@ class closed_forward_diffusion(nn.Module):
 
         ##make the distribution
         dist = Normal(torch.zeros_like(batch_means), torch.ones_like(batch_means))
-        epsilon  = dist.sample()
+        epsilon  = dist.sample().to(self.device)
 
         assert epsilon.shape == batch_stds.shape
 

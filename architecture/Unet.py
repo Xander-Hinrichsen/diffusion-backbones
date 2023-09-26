@@ -90,11 +90,13 @@ class UNet(nn.Module):
         return self.to_img(xb)
 
     def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, probabilistic=True,
-                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
+                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+                     ret_steps=None):
         self.to(device)
         self.eval()
         self.bar_alpha_sched.to(device)
         self.alpha_sched.to(device)
+        returns = []
         with torch.no_grad():
             dist = Normal(torch.zeros(num_imgs, 3, res[0], res[1]), torch.ones(num_imgs, 3, res[0], res[1]))
             curr_x = dist.sample().to(device)
@@ -109,4 +111,11 @@ class UNet(nn.Module):
 
                 curr_x = (1/torch.sqrt(self.alpha_sched[i]) * 
                           (curr_x - (((1-self.alpha_sched[i])/(torch.sqrt(1-self.bar_alpha_sched[i])))* self.forward(curr_x, torch.tensor([i]).to(device).repeat(num_imgs))))) + (sigma*z)
-            return curr_x
+                if ret_steps != None:
+                    if i in ret_steps and i != 0:
+                        returns.append(curr_x)
+            returns.append(curr_x)
+            if ret_steps == None:
+                return curr_x
+            else:
+                return returns[::-1]
