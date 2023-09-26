@@ -80,7 +80,7 @@ for epoch in range(epochs):
     sample_time_list = model.DDPM_Sample(num_imgs=10, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
     mantage_img = unroll_samples(sample_time_list)
     ##convert from torch [-1,1] to Image [0,255]
-    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach.cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
     wandb.log({"epoch " + str(epoch) + " rollout": wandb.Image(wandb_friendly_img)})
     if epoch % 20 == 0:
         torch.save(model.state_dict(), "trained_models/epoch" + str(epoch) + ".pth")

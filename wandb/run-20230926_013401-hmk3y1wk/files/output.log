@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 83, in <module>
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach.cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+AttributeError: 'builtin_function_or_method' object has no attribute 'cpu'
+Traceback (most recent call last):
+  File "/home/xander/Documents/research_projects/not_sota/DDPM_Vanilla/ddpm-vanilla/train.py", line 83, in <module>
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach.cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+AttributeError: 'builtin_function_or_method' object has no attribute 'cpu'
