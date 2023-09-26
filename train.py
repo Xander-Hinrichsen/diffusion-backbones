@@ -82,5 +82,5 @@ for epoch in range(epochs):
     ##convert from torch [-1,1] to Image [0,255]
     wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
     wandb.log({"epoch rollout": wandb.Image(wandb_friendly_img)})
-    if epoch % 20 == 0:
+    if (epoch % 20 == 0) and epoch != 0:
         torch.save(model.state_dict(), "trained_models/epoch" + str(epoch) + ".pth")
