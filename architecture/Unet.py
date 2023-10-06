@@ -11,10 +11,10 @@ from torch.distributions import Normal
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class ResBlock(nn.Module):
-    def __init__(self, in_channels, mid_channels, out_channels, time_dim=64):
+    def __init__(self, in_channels, mid_channels, out_channels, t_dim=64):
         super().__init__()
-        self.time_dim = time_dim
-        self.time_projector = nn.Linear(time_dim, in_channels)
+        self.time_dim = t_dim
+        self.time_projector = nn.Linear(t_dim, in_channels)
         self.network = nn.Sequential(
             nn.Conv2d(in_channels, mid_channels,kernel_size=(3,3), padding=1, bias=False),
             nn.BatchNorm2d(mid_channels),
@@ -28,7 +28,8 @@ class ResBlock(nn.Module):
     def forward(self, xb, t):
         #time embedding works like an extra bias for the convolutions of previous resblock
         ##output will be (b, in_channels)
-        time_embedding = self.time_projector(self.pos_encoder(t, self.time_dim)).view(t.shape[0],self.in_channels,1,1)
+        #after unsqueezing this becomes (b, in_channels, 1, 1), as to broadcaast along channels
+        time_embedding = self.time_projector(self.pos_encoder(t, self.time_dim)).unsqueeze(-1).unsqueeze(-1)
         xb = xb + time_embedding
         return self.network(xb) + self.resid_connector(xb)
 
@@ -42,7 +43,7 @@ class Upsampler(nn.Module):
         return self.Upsampler(xb)
 
 class UNet(nn.Module):
-    def __init__(self, T=1000):
+    def __init__(self, T=1000, t_dim=64):
         super().__init__()
         self.T = T
         self.beta_sched, self.alpha_sched, self.bar_alpha_sched = get_ddpm_schedules(T=self.T)
