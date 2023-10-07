@@ -214,7 +214,7 @@ class UNet(nn.Module):
 
         skip_by = self.T // steps
         with torch.no_grad():
-            for i in range(1, steps)[::-1]:
+            for i in range(1, steps+1)[::-1]:
                 ##indices of the t and tdelta, and labels of the curr_t
                 curr_t = i * skip_by
                 curr_t_labels = torch.tensor([curr_t]).to(device).repeat(num_imgs)
