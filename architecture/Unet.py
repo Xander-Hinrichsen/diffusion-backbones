@@ -1,7 +1,11 @@
-#unet implementation taken from my cityscapes segmentation, so we know it works well.
-##augmentations to this -> have to add in the transformer sinusoildal encodings into ever resblock
-##ended up doing time encoding between the channels like the paper did originally. I'm a sellout
-##original unet from my work had 5 levels, so it reduced res side length by 2^5. Changing to 3 levels for cifar10: 32x32 -> 4x4 -> 32x32
+##Regular UNet has 4 down/upscals, for cifar10, they use only 3 levels: 32x32 -> 4x4 -> 32x32
+
+##Necesary Assumptions, normalization choice changes:
+##this is the setup they had in the paper, the only difference is I'm using batchnorm for the convs, and layernorm after the self attention
+##and I'm using handcrafted number of channels and handcrafted projection of time embeddings, everything else is the exact same as the paper
+##everything 'handcrafted' is due to lack of details of the paper, assuming my intuition is enough to determine these numbers
+##due to channel choice difference, my model has 41 million params, rather than 35 million params
+##it's also unclear the number of heads they used for multihead attention, but 4 seems to be the common go-to, using that here
 
 import torch
 import torch.nn as nn
@@ -10,6 +14,7 @@ from torch.distributions import Normal
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+##do not change name of ResBlock class, string of class name used in cutom Sequential object below
 class ResBlock(nn.Module):
     def __init__(self, in_channels, mid_channels, out_channels, t_dim=64):
         super().__init__()
@@ -33,6 +38,37 @@ class ResBlock(nn.Module):
         xb = xb + time_embedding
         return self.network(xb) + self.resid_connector(xb)
 
+class ResSelfAttention(nn.Module):
+    def __init__(self, embed_dim=16*16, num_heads=4, norm='layer'):
+        """
+            For use of self attention at 16x16 resolution by default
+            includes a residual connection and normalization after
+            default to layer norm because it works well
+            group/batch norm optional hyperparameters
+            default to batch first, why wouldn't you?
+            NLPers are cringe for not defaulting batch dim first
+        """
+        super().__init__()
+        
+        assert norm == 'layer' or norm == 'batch'
+
+        self.flatten = nn.Flatten(-2,-1) #flattens (...,w,h) to (...,embed_dim)
+        self.self_attention = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, batch_first=True)
+        
+        if norm == 'layer':
+            self.norm = nn.LayerNorm(embed_dim)
+        if norm == 'batch':
+            self.norm = nn.BatchNorm1d(embed_dim)
+
+    def forward(self, xb):
+        ##flatten to (b,c,embed_dim)
+        xb_flat = self.flatten(xb)
+        attended, _ = self.self_attention(xb_flat,xb_flat,xb_flat)
+        ##normalize the residual
+        norm = self.norm(attended+xb_flat)
+        ##reshape the output to (b,c,w,h)
+        return norm.view(xb.shape[0], xb.shape[1], xb.shape[2], xb.shape[3])
+
 class Upsampler(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -43,7 +79,7 @@ class Upsampler(nn.Module):
         xb = self.upsampler(xb)
         return self.conv(xb) + self.resizer(xb)
     
-##have to make my own sequential, because we have to pass t through our resblocks
+##have to make my own sequential, because we have to pass t through our resblocks and not through attn blocks
 class Sequential(nn.Module):
     def __init__(self, layers):
         """
@@ -52,8 +88,13 @@ class Sequential(nn.Module):
         super().__init__()
         self.layers = nn.ModuleList(layers)
     def forward(self, xb, t):
-        for i in range(len(self.layers)):
-            xb = self.layers[i](xb, t)
+        for layer in self.layers:
+            ##if it's a resblock, we also have to pass in t 
+            if str(type(layer)) == "<class 'architecture.Unet.ResBlock'>":
+                xb = layer(xb, t)
+            ##otherwise, it's a self attention + normalization layer
+            else:
+                xb = layer(xb)
         return xb
 
 class UNet(nn.Module):
@@ -64,7 +105,7 @@ class UNet(nn.Module):
         ##ENCODER instance vars     beta_sched, alpha_sched, bar_alpha_sched      #32x32
         self.encodeB = Sequential((ResBlock(3,32,32), ResBlock(32,64,64)))
         self.MaxPoolB = nn.MaxPool2d(2)   #16x16
-        self.encodeM = Sequential((ResBlock(64,128,128),ResBlock(128,256,256)))
+        self.encodeM = Sequential((ResBlock(64,128,128),ResSelfAttention(embed_dim=16*16), ResBlock(128,256,256)))
         self.MaxPoolM = nn.MaxPool2d(2)   #8x8
         self.encodeS = Sequential((ResBlock(256,256,256), ResBlock(256,512,512)))
         self.MaxPoolS = nn.MaxPool2d(2)   #4x4
@@ -77,7 +118,7 @@ class UNet(nn.Module):
         self.upsamplerS = Upsampler(1024, 512) #8x8
         self.decodeS = Sequential((ResBlock(1024, 512, 512), ResBlock(512, 512, 512)))
         self.upsamplerM = Upsampler(512, 256) #16x16
-        self.decodeM = Sequential((ResBlock(512, 256, 256), ResBlock(256, 128, 128)))
+        self.decodeM = Sequential((ResBlock(512, 256, 256), ResSelfAttention(embed_dim=16*16), ResBlock(256, 128, 128)))
         self.upsamplerB = Upsampler(128, 64)  #32x32
         self.decodeB = Sequential((ResBlock(128, 64, 64),ResBlock(64, 64, 64)))
         
@@ -137,7 +178,7 @@ class UNet(nn.Module):
             else:
                 return returns[::-1]
             
-    def DDPM_Sample(self, num_imgs=1, total_steps=100, n=1, upper_bound=False,
+    def DDIM_Sample(self, num_imgs=1, total_steps=100, n=1, upper_bound=False,
                      device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                      ret_steps=None):
         pass
