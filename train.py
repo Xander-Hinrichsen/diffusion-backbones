@@ -93,8 +93,8 @@ for epoch in range(epochs):
     ##evaluate model
     model.eval()
 
-    #only log samples every 10 epochs, takes too long to sample otherwise
-    if (epoch % 10) == 0:
+    #only log samples every 20 epochs, takes too long to sample otherwise
+    if (epoch % 20) == 0:
         ##ddpm sampling, fast model
         sample_time_list = model.DDPM_Sample(num_imgs=10, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
         mantage_img = unroll_samples(sample_time_list)

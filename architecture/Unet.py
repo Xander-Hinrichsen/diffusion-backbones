@@ -225,6 +225,10 @@ class UNet(nn.Module):
 
                 ##predict x0 
                 pred_x0 = (curr_x - (torch.sqrt(1-self.bar_alpha_sched[curr_t])*pred_noise))/torch.sqrt(self.bar_alpha_sched[curr_t])
+
+                if next_t == 0:
+                    curr_x = pred_x0
+                    break
                 
                 ##scale down by next_bar_alpha_sched to get the mean of x_next_t
                 mean_x_next = torch.sqrt(self.bar_alpha_sched[next_t])* pred_x0
