@@ -1,5 +1,5 @@
-##Todo -> add ema model updating, instead of basic model training
 ##Todo -> ddim sampling, want to log ddim sampling at different number of steps
+##Todo -> FID and InceptionScore
 
 ##images are expected to be scaled linearly to [-1,1]
 ##basic imports
@@ -35,14 +35,14 @@ epochs = 10000
 lr = 2e-4
 batch_size=128
 ema_decay = 0.9999
-dl = DataLoader(train_dataset, batch_size=128, shuffle=True, drop_last=True, num_workers=2)
+dl = DataLoader(train_dataset, batch_size=128, shuffle=True, drop_last=True)
 
 ##model, avg_model for ema, & unsupervised learnining 'labeler'
 model = UNet()
-avg_model = copy.deepcopy(model).eval()
+avg_model = copy.deepcopy(model).to(device).eval()
 forward_diffuser = closed_forward_diffusion(model.bar_alpha_sched)
 
-hyperparams = {"epochs": epochs, "lr": lr, "batch_size": batch_size, "T":1000, "EMA model decay": ""}
+hyperparams = {"epochs": epochs, "lr": lr, "batch_size": batch_size, "T":1000, "EMA model decay": ema_decay}
 wandb.log(hyperparams)
 ##simple loss from paper
 loss_fn = nn.MSELoss()
@@ -97,5 +97,5 @@ for epoch in range(epochs):
     ##convert from torch [-1,1] to Image [0,255]
     wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
     wandb.log({"epoch rollout": wandb.Image(wandb_friendly_img)})
-    if (epoch % 20 == 0) and epoch != 0:
+    if (epoch % 50 == 0) and epoch != 0:
         torch.save(model.state_dict(), "trained_models/epoch" + str(epoch) + ".pth")

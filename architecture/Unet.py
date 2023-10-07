@@ -110,7 +110,7 @@ class UNet(nn.Module):
         self.MaxPoolS = nn.MaxPool2d(2)   #4x4
         
         ##Connector
-        self.Connector = Sequential((ResBlock(512,512,512),ResBlock(512,512,1024))) ##should be 4 x 4 with 512 feature maps
+        self.Connector = Sequential((ResBlock(512,512,512),ResBlock(512,512,1024))) ##should be 4 x 4 with 1024 feature maps
         
         ##Decoder instance vars - notice inputs are twice as big as should be for the convblock, normally
         ##This is because of the concatonation that happens with UNet 
@@ -147,40 +147,100 @@ class UNet(nn.Module):
         xb = self.decodeB(torch.cat((b,xb), dim=1), t)
         return self.to_img(xb, t)
 
-    def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, probabilistic=True,
+    def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, 
                      device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                      ret_steps=None):
+        ##meh, easy to read and understand, not gonna sit here
+        ##and type out an explanation for these lines of code for you
         self.to(device)
         self.eval()
         self.bar_alpha_sched.to(device)
         self.alpha_sched.to(device)
         returns = []
+
+        ##were iterating over many, many time steps. Never track gradients while sampling
         with torch.no_grad():
+            ##dist to be used for sampling both xt initially and ddpm noise addition, nose is in shape (b,3,w,h)
             dist = Normal(torch.zeros(num_imgs, 3, res[0], res[1]), torch.ones(num_imgs, 3, res[0], res[1]))
             curr_x = dist.sample().to(device)
+            
+            ##sampling procedure -> full ddpm 100, (T), steps
             for i in range(t)[::-1]:
+                ##ddpm noise addition vars
                 z = dist.sample().to(device)
                 var = 0
                 sigma = 0
-                if i!=0 and probabilistic:
+                ##don't add noise for the final result :), otherwise, add noise according to schedule
+                if i!=0:
                     if upper_bound:
                         var = self.beta_sched[i]
                     else:
                         var = ((1-self.bar_alpha_sched[i-1])/(1-self.bar_alpha_sched[i]))*self.beta_sched[i]
                     sigma = torch.sqrt(var)
-
+                
+                ##both noise reduction (subtraction of predicted noise) and mean scaling (scale up), to restore xt from xt-1
                 curr_x = (1/torch.sqrt(self.alpha_sched[i]) * 
                           (curr_x - (((1-self.alpha_sched[i])/(torch.sqrt(1-self.bar_alpha_sched[i])))* self.forward(curr_x, torch.tensor([i]).to(device).repeat(num_imgs))))) + (sigma*z)
+                
+                #hold the xts from ret_steps, rest is easy to understand
                 if ret_steps != None:
                     if i in ret_steps and i != 0:
-                        returns.append(curr_x)
+                        returns.append(curr_x)            
             returns.append(curr_x)
             if ret_steps == None:
                 return curr_x
             else:
                 return returns[::-1]
             
-    def DDIM_Sample(self, num_imgs=1, total_steps=100, n=1, upper_bound=False,
-                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
-                     ret_steps=None):
-        pass
+    def DDIM_Sample(self, num_imgs=1, steps=100, n=1, upper_bound=False, res=(32,32),
+                    device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+                    ret_steps=None):
+        """
+            Function assums hyperparameter n is 0. This means DDIM sampling only. 
+            This hyperparameter can be added later, but currently, I don't see the point.
+        """
+        ##ensure that training steps is divible by ddim steps
+        assert (self.T % steps) == 0
+        ##meh, easy to read and understand, not gonna sit here
+        ##and type out an explanation for these lines of code for you
+        self.to(device)
+        self.eval()
+        self.bar_alpha_sched.to(device)
+        returns = []
+
+        ##dist to be used for sampling both xt initially nose is in shape (b,3,w,h)
+        dist = Normal(torch.zeros(num_imgs, 3, res[0], res[1]), torch.ones(num_imgs, 3, res[0], res[1]))
+        curr_x = dist.sample().to(device)
+
+        skip_by = self.T // steps
+        with torch.no_grad():
+            for i in range(1, steps)[::-1]:
+                ##indices of the t and tdelta, and labels of the curr_t
+                curr_t = i * skip_by
+                curr_t_labels = torch.tensor([curr_t]).to(device).repeat(num_imgs)
+                next_t = (i-1) * skip_by
+
+                ##predict total noise -> remember ddim cuts the bs and says we're predicting all noise at every timestep
+                pred_noise = self.forward(curr_x, curr_t_labels)
+
+                ##predict x0 
+                pred_x0 = (curr_x - (torch.sqrt(1-self.bar_alpha_sched[curr_t])*pred_noise))/torch.sqrt(self.bar_alpha_sched[curr_t])
+                
+                ##scale down by next_bar_alpha_sched to get the mean of x_next_t
+                mean_x_next = torch.sqrt(self.bar_alpha_sched[next_t])* pred_x0
+                
+                ##add back the variance accumulation to x_next to get an estimate of true x_next
+                x_next = mean_x_next + (torch.sqrt(1-self.bar_alpha_sched[next_t])*pred_noise)
+
+                ##reset for next iter
+                curr_x = x_next
+                
+                #hold the xts from ret_steps, rest is easy to understand
+                if ret_steps != None:
+                    if i in ret_steps and i != 0:
+                        returns.append(curr_x)            
+            returns.append(curr_x)
+            if ret_steps == None:
+                return curr_x
+            else:
+                return returns[::-1]
