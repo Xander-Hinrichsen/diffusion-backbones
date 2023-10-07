@@ -211,10 +211,11 @@ class UNet(nn.Module):
         ##dist to be used for sampling both xt initially nose is in shape (b,3,w,h)
         dist = Normal(torch.zeros(num_imgs, 3, res[0], res[1]), torch.ones(num_imgs, 3, res[0], res[1]))
         curr_x = dist.sample().to(device)
-
+        ##have to append the first step :)
+        returns.append(curr_x)
         skip_by = self.T // steps
         with torch.no_grad():
-            for i in range(1, steps+1)[::-1]:
+            for i in range(steps)[::-1]:
                 ##indices of the t and tdelta, and labels of the curr_t
                 curr_t = i * skip_by
                 curr_t_labels = torch.tensor([curr_t]).to(device).repeat(num_imgs)
