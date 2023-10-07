@@ -20,7 +20,8 @@ from architecture.Unet import UNet
 from DDPM_Utils import unroll_samples
 
 ##cifar10 dataset easy import
-train_dataset = torchvision.datasets.CIFAR10(root='./data', transform=tfs.ToTensor(), train=True, download=True)
+data_aug = tfs.Compose([tfs.RandomHorizontalFlip(p=0.5), tfs.ToTensor()])
+train_dataset = torchvision.datasets.CIFAR10(root='./data', transform=data_aug, train=True, download=True)
 
 ##device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
