@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 ##for vizualizing 
 def unroll_samples(sample_list):

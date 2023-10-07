@@ -76,3 +76,5 @@ class pos_encoding(nn.Module):
         pe[:, sin_i] = torch.sin(t.view(-1,1).repeat(1,sin_i.shape[0])/(10000**(pe[:, sin_i]/d)))
         pe[:, cos_i] = torch.cos(t.view(-1,1).repeat(1,cos_i.shape[0])/(10000**(pe[:, cos_i]/d)))
         return pe
+
+

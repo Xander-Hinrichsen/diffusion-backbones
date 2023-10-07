@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from PIL import Image
 import wandb
+import copy #for EMA model updating
 
 ##dataset/visualization 
 import torchvision
@@ -26,18 +27,22 @@ train_dataset = torchvision.datasets.CIFAR10(root='./data', transform=tfs.ToTens
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ##wandb
-wandb.init(project="vanilla_ddpm")
+wandb.init(project="DDPM & DDIM Sampling, 41 mil param, self attn at 16x16, EMA model updating")
 
 ##hyperparameters
 ##just going to use the hyperparams from the paper, optim is adam
 epochs = 10000
 lr = 2e-4
 batch_size=128
+ema_decay = 0.9999
 dl = DataLoader(train_dataset, batch_size=128, shuffle=True, drop_last=True, num_workers=2)
+
+##model, avg_model for ema, & unsupervised learnining 'labeler'
 model = UNet()
+avg_model = copy.deepcopy(model).eval()
 forward_diffuser = closed_forward_diffusion(model.bar_alpha_sched)
 
-hyperparams = {"epochs": epochs, "lr": lr, "batch_size": batch_size, "T":1000, "beta_schedule": "1e-4 to 0.02"}
+hyperparams = {"epochs": epochs, "lr": lr, "batch_size": batch_size, "T":1000, "EMA model decay": ""}
 wandb.log(hyperparams)
 ##simple loss from paper
 loss_fn = nn.MSELoss()
@@ -48,8 +53,8 @@ optim = torch.optim.Adam(model.parameters(), lr=lr)
 loss_per_epoch = []
 for epoch in range(epochs):
     epoch_loss = []
-    model.train()
     for x_0, _ in dl:
+        model.train()
         ##x_0 is expected to be [-1,1], ToTensor() used before made it [0,1]
         x_0 = x_0.to(device)
         x_0 = (2*x_0)-1
@@ -58,6 +63,7 @@ for epoch in range(epochs):
         t = torch.randint(0, 1000, (x_0.shape[0],))
         t = t.to(device)
 
+        #training
         ##use closed formula forward diffusion
         ##x_t is our input, epsilon is our label
         x_t, epsilon = forward_diffuser(x_0,t)
@@ -74,7 +80,13 @@ for epoch in range(epochs):
         epoch_loss.append(loss.mean().item())
         del(x_0);del(x_t);del(t);del(epsilon)
         torch.cuda.empty_cache()
-    
+
+        ##EMA model updating -> update our average model on moving average basis
+        model.eval()
+        with torch.no_grad():
+            for avg_layer, fast_layer in zip(avg_model.state_dict.values(),model.state_dict.values()):
+                avg_layer = ema_decay*avg_layer + (1-ema_decay)*fast_layer
+
     loss_per_epoch.append(np.mean(epoch_loss))
     wandb.log({"epoch loss": loss_per_epoch[epoch]})
 

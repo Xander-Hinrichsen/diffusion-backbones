@@ -49,7 +49,6 @@ class ResSelfAttention(nn.Module):
             NLPers are cringe for not defaulting batch dim first
         """
         super().__init__()
-        
         assert norm == 'layer' or norm == 'batch'
 
         self.flatten = nn.Flatten(-2,-1) #flattens (...,w,h) to (...,embed_dim)
@@ -64,7 +63,7 @@ class ResSelfAttention(nn.Module):
         ##flatten to (b,c,embed_dim)
         xb_flat = self.flatten(xb)
         attended, _ = self.self_attention(xb_flat,xb_flat,xb_flat)
-        ##normalize the residual
+        ##normalize the out + residual
         norm = self.norm(attended+xb_flat)
         ##reshape the output to (b,c,w,h)
         return norm.view(xb.shape[0], xb.shape[1], xb.shape[2], xb.shape[3])
@@ -126,6 +125,9 @@ class UNet(nn.Module):
         self.to_img = ResBlock(64, 64, 3)
         
     def forward(self, xb, t):
+        ##make sure the batch sizes match x and t
+        assert xb.shape[0] == t.shape[0]
+
         #pass through encoder
         b = self.encodeB(xb, t)
         xb = self.MaxPoolB(b)
