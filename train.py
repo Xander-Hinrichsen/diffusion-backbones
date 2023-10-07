@@ -92,10 +92,56 @@ for epoch in range(epochs):
 
     ##evaluate model
     model.eval()
+
+    ##ddpm sampling, fast model
     sample_time_list = model.DDPM_Sample(num_imgs=10, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
     mantage_img = unroll_samples(sample_time_list)
     ##convert from torch [-1,1] to Image [0,255]
     wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
-    wandb.log({"epoch rollout": wandb.Image(wandb_friendly_img)})
+    wandb.log({"ddpm fast model, 0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000": wandb.Image(wandb_friendly_img)})
+
+    ##ddpm sampling, avg model
+    sample_time_list = avg_model.DDPM_Sample(num_imgs=10, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddpm avg model, 0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000": wandb.Image(wandb_friendly_img)})
+
+    ##ddim sampling, avg model, 500 steps
+    sample_time_list = avg_model.DDIM_Sample(num_imgs=10, steps=500, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 300, 500])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddim avg model, 0, 10, 20, 40, 60, 80, 100, 150, 250, 300, 500": wandb.Image(wandb_friendly_img)})
+
+    ##ddim sampling, avg model, 200 steps
+    sample_time_list = avg_model.DDIM_Sample(num_imgs=10, steps=200, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 200])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddim avg model, 0, 10, 20, 40, 60, 80, 100, 150, 200": wandb.Image(wandb_friendly_img)})
+
+    ##ddim sampling, avg model, 100 steps
+    sample_time_list = avg_model.DDIM_Sample(num_imgs=10, steps=100, ret_steps=[0, 10, 20, 40, 60, 70, 80, 90, 100])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddim avg model, 0, 10, 20, 40, 60, 70, 80, 90, 100": wandb.Image(wandb_friendly_img)})
+
+    ##ddim sampling, avg model, 50 steps
+    sample_time_list = avg_model.DDIM_Sample(num_imgs=10, steps=50, ret_steps=[0, 10, 15, 20, 25, 30, 35, 40, 50])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddim avg model, 0, 10, 15, 20, 25, 30, 35, 40, 50": wandb.Image(wandb_friendly_img)})
+
+    ##ddim sampling, avg model, 20 steps
+    sample_time_list = avg_model.DDIM_Sample(num_imgs=10, steps=20, ret_steps=[0, 5, 10, 12, 14, 16, 18, 20])
+    mantage_img = unroll_samples(sample_time_list)
+    ##convert from torch [-1,1] to Image [0,255]
+    wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+    wandb.log({"ddim avg model, 0, 5, 10, 12, 14, 16, 18, 20": wandb.Image(wandb_friendly_img)})
+
     if (epoch % 50 == 0) and epoch != 0:
-        torch.save(model.state_dict(), "trained_models/epoch" + str(epoch) + ".pth")
+        torch.save(avg_model.state_dict(), "trained_models/avg_model_epoch" + str(epoch) + ".pth")
+        torch.save(model.state_dict(), "trained_models/fast_model_epoch" + str(epoch) + ".pth")

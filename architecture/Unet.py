@@ -192,7 +192,7 @@ class UNet(nn.Module):
             else:
                 return returns[::-1]
             
-    def DDIM_Sample(self, num_imgs=1, steps=100, n=1, upper_bound=False, res=(32,32),
+    def DDIM_Sample(self, num_imgs=1, steps=100, res=(32,32),
                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                     ret_steps=None):
         """
