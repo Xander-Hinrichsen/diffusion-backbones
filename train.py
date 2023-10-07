@@ -1,3 +1,6 @@
+##Todo -> add ema model updating, instead of basic model training
+##Todo -> ddim sampling, want to log ddim sampling at different number of steps
+
 ##images are expected to be scaled linearly to [-1,1]
 ##basic imports
 import torch

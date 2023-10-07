@@ -36,11 +36,25 @@ class ResBlock(nn.Module):
 class Upsampler(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.Upsampler = nn.Sequential(
-            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-            nn.Conv2d(in_channels, out_channels, kernel_size=(3,3), padding=1))
+        self.upsampler = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(3,3), padding=1)
+        self.resizer = nn.Conv2d(in_channels, out_channels, kernel_size=1)
     def forward(self, xb):
-        return self.Upsampler(xb)
+        xb = self.upsampler(xb)
+        return self.conv(xb) + self.resizer(xb)
+    
+##have to make my own sequential, because we have to pass t through our resblocks
+class Sequential(nn.Module):
+    def __init__(self, layers):
+        """
+        layers must be a tuple of the layers
+        """
+        super().__init__()
+        self.layers = nn.ModuleList(layers)
+    def forward(self, xb, t):
+        for i in range(len(self.layers)):
+            xb = self.layers[i](xb, t)
+        return xb
 
 class UNet(nn.Module):
     def __init__(self, T=1000, t_dim=64):
@@ -48,27 +62,27 @@ class UNet(nn.Module):
         self.T = T
         self.beta_sched, self.alpha_sched, self.bar_alpha_sched = get_ddpm_schedules(T=self.T)
         ##ENCODER instance vars     beta_sched, alpha_sched, bar_alpha_sched      #32x32
-        self.encodeB = ResBlock(3,64,64)   
+        self.encodeB = Sequential((ResBlock(3,32,32), ResBlock(32,64,64)))
         self.MaxPoolB = nn.MaxPool2d(2)   #16x16
-        self.encodeM = ResBlock(64,128,128)
+        self.encodeM = Sequential((ResBlock(64,128,128),ResBlock(128,256,256)))
         self.MaxPoolM = nn.MaxPool2d(2)   #8x8
-        self.encodeS = ResBlock(128,256,256)
+        self.encodeS = Sequential((ResBlock(256,256,256), ResBlock(256,512,512)))
         self.MaxPoolS = nn.MaxPool2d(2)   #4x4
         
         ##Connector
-        self.Connector = ResBlock(256,512,512) ##should be 4 x 4 with 512 feature maps
+        self.Connector = Sequential((ResBlock(512,512,512),ResBlock(512,512,1024))) ##should be 4 x 4 with 512 feature maps
         
         ##Decoder instance vars - notice inputs are twice as big as should be for the convblock, normally
         ##This is because of the concatonation that happens with UNet 
-        self.upsamplerS = Upsampler(512, 256) #8x8
-        self.decodeS = ResBlock(512, 256, 256)
-        self.upsamplerM = Upsampler(256, 128) #16x16
-        self.decodeM = ResBlock(256, 128, 128)
+        self.upsamplerS = Upsampler(1024, 512) #8x8
+        self.decodeS = Sequential((ResBlock(1024, 512, 512), ResBlock(512, 512, 512)))
+        self.upsamplerM = Upsampler(512, 256) #16x16
+        self.decodeM = Sequential((ResBlock(512, 256, 256), ResBlock(256, 128, 128)))
         self.upsamplerB = Upsampler(128, 64)  #32x32
-        self.decodeB = ResBlock(128, 64, 64)
+        self.decodeB = Sequential((ResBlock(128, 64, 64),ResBlock(64, 64, 64)))
         
         ##from #feature maps to 3 channels for image reconstruction from latent space
-        self.to_img = nn.Conv2d(64, 3, kernel_size=1)
+        self.to_img = ResBlock(64, 64, 3)
         
     def forward(self, xb, t):
         #pass through encoder
@@ -88,7 +102,7 @@ class UNet(nn.Module):
         xb = self.decodeM(torch.cat((m,xb), dim=1), t)
         xb = self.upsamplerB(xb)
         xb = self.decodeB(torch.cat((b,xb), dim=1), t)
-        return self.to_img(xb)
+        return self.to_img(xb, t)
 
     def DDPM_Sample(self, num_imgs=1, t=1000, res=(32,32), upper_bound=False, probabilistic=True,
                      device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
@@ -122,3 +136,8 @@ class UNet(nn.Module):
                 return curr_x
             else:
                 return returns[::-1]
+            
+    def DDPM_Sample(self, num_imgs=1, total_steps=100, n=1, upper_bound=False,
+                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+                     ret_steps=None):
+        pass
