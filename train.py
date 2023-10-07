@@ -84,7 +84,7 @@ for epoch in range(epochs):
         ##EMA model updating -> update our average model on moving average basis
         model.eval()
         with torch.no_grad():
-            for avg_layer, fast_layer in zip(avg_model.state_dict.values(),model.state_dict.values()):
+            for avg_layer, fast_layer in zip(avg_model.state_dict().values(),model.state_dict().values()):
                 avg_layer = ema_decay*avg_layer + (1-ema_decay)*fast_layer
 
     loss_per_epoch.append(np.mean(epoch_loss))
