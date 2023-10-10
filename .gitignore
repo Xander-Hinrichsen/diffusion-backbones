@@ -3,3 +3,4 @@ data
 trained_models
 wandb
 architecture/__pycache__
+eval.ipynb

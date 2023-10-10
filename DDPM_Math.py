@@ -1,14 +1,31 @@
 import torch
 from torch.distributions.normal import Normal
 import torch.nn as nn
+import math
 
-def get_ddpm_schedules(T=1000):
+def get_ddpm_schedules(T=1000, type='linear'):
     """ Returns beta_sched, alpha_sched, bar_alpha_sched
         as described by vanilla ddpm paper, followed exactly
     """
-    beta_sched = torch.linspace(0.0001, 0.02, T)
-    alpha_sched = 1 - beta_sched
+    assert type == 'linear' or 'cosine'
 
+    if type == 'linear':
+        print('using Linear Beta Schedule')
+        beta_sched = torch.linspace(0.0001, 0.02, T)
+
+    else:
+        print('using Cosine Beta Schedule')
+        max_beta = 0.999
+        def alpha_bar_fn(t):
+            return math.cos((t + 0.008) / 1.008 * math.pi / 2) ** 2
+        beta_sched = []
+        for i in range(T):
+            t1 = i / T
+            t2 = (i + 1) / T
+            beta_sched.append(min(1 - alpha_bar_fn(t2) / alpha_bar_fn(t1), max_beta))
+        beta_sched = torch.tensor(beta_sched, dtype=torch.float32)
+    
+    alpha_sched = torch.tensor([1.0],dtype=torch.float32) - beta_sched
     bar_alpha_sched = alpha_sched.clone()
     for i in range(1, len(bar_alpha_sched)):
         bar_alpha_sched[i] = bar_alpha_sched[i] * bar_alpha_sched[i-1]
@@ -36,13 +53,13 @@ class closed_forward_diffusion(nn.Module):
             returns the noised x0 and the unscaled epsilon noise
         """
         batch_bar_alpha_ts = self.bar_alpha[t]
-        batch_means = torch.sqrt(batch_bar_alpha_ts).view(t.shape[0], 1, 1, 1) * x_0
+        batch_means = torch.sqrt(batch_bar_alpha_ts).unsqueeze(-1,).unsqueeze(-1).unsqueeze(-1) * x_0
         assert len(batch_means.shape) == 4
         ##they use a multivariate normal with covariance as scaled identity matrix
         ##this is equivalent to an individual guassian for each pixel, i.e. zero covariance
         ##just make sure you input the std, not the variance into the univariate distribution
 
-        batch_vars = (1-batch_bar_alpha_ts)
+        batch_vars = (torch.tensor([1.0],dtype=torch.float32).to(self.device)-batch_bar_alpha_ts)
         batch_stds = torch.sqrt(batch_vars).view(batch_bar_alpha_ts.shape[0],1,1,1).repeat(1,3,x_0.shape[-2], x_0.shape[-1]) 
 
         ##make the distribution
