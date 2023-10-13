@@ -73,7 +73,6 @@ class closed_forward_diffusion(nn.Module):
         return x_t, epsilon        
 
 ##positional encodings are used from the transformer paper - at every resblock of the unet
-##look at readme of how I better implemented the time embeddings for ddpm; what were these authors on? Not the good stimulants it seems
 class pos_encoding(nn.Module):
     def __init__(self):
         super().__init__()
