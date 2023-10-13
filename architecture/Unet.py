@@ -1,11 +1,7 @@
 ##Regular UNet has 4 down/upscals, for cifar10, they use only 3 levels: 32x32 -> 4x4 -> 32x32
 
-##Necesary Assumptions, normalization choice changes:
-##this is the setup they had in the paper, the only difference is I'm using layernorm for the convs, and layernorm after the self attention
-##and I'm using handcrafted number of channels and handcrafted projection of time embeddings, everything else is the exact same as the paper
-##everything 'handcrafted' is due to lack of details of the paper, assuming my intuition is enough to determine these numbers
-##due to channel choice difference, my model has 41 million params, rather than 35 million params
-##it's also unclear the number of heads they used for multihead attention, but 4 seems to be the common go-to, using that here
+##Everything here implemented same as except they do not describe number of channels per resblock
+##Number of channels per resblock is handcrafted, but total parameter count is nearly identical to their work
 
 import torch
 import torch.nn as nn
