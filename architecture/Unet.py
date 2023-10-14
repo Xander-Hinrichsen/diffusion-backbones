@@ -148,11 +148,9 @@ class UNet(nn.Module):
                     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                     ret_steps=None):
         """
-            Function assums hyperparameter n is 0. This means DDIM sampling only. 
-            This hyperparameter can be added later, but currently, I don't see the point.
-            Using assumption all elements x0 is in clamped range [x0_min, x0,max]
-            This assumption would be wrong if elements have their own unique ranges-
-            if that is the case -such as in action spaces- , code must be modified to accomidate
+            DDIM sampling at an arbritrary number of denoising steps
+            DDPM sampling can be turned on by setting ddpm=True
+            DDPM sampling uses full T=1000 denoising steps and adds back noise perturbations as usual
         """
         ##cannot use cosine schedule with upperbound=True, results in a sqrt of a negative number with ddim formula
         if self.sched_type == 'cosine':
