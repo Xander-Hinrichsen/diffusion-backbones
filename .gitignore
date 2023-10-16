@@ -4,3 +4,5 @@ trained_models
 wandb
 architecture/__pycache__
 eval.ipynb
+fid.ipynb
+fid_testing

@@ -27,7 +27,7 @@ train_dataset = torchvision.datasets.CIFAR10(root='./data', transform=data_aug, 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ##wandb
-wandb.init(project="DDIM, cosine beta schedule, clamping x0 preds to [-1,1]")
+wandb.init(project="U-VIT-S (Deep) Unconditional Cifar-10")
 
 ##hyperparameters
 ##just going to use the hyperparams from the paper, optim is adam
@@ -106,12 +106,12 @@ for epoch in range(epochs):
         wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
         wandb.log({"ddpm, upperbound=False, T=1000: 0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000": wandb.Image(wandb_friendly_img)})
 
-        ##ddim sampling, full T
-        sample_time_list = model.DDIM_Sample(num_imgs=10, steps = model.T, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
-        mantage_img = unroll_samples(sample_time_list)
-        ##convert from torch [-1,1] to Image [0,255]
-        wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
-        wandb.log({"ddim T=1000: 0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000": wandb.Image(wandb_friendly_img)})
+        # ##ddim sampling, full T
+        # sample_time_list = model.DDIM_Sample(num_imgs=10, steps = model.T, ret_steps=[0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000])
+        # mantage_img = unroll_samples(sample_time_list)
+        # ##convert from torch [-1,1] to Image [0,255]
+        # wandb_friendly_img = Image.fromarray(np.array(((mantage_img.detach().cpu()+1)/2).permute(1,2,0)*255, dtype=np.uint8))
+        # wandb.log({"ddim T=1000: 0, 10, 20, 40, 60, 80, 100, 150, 250, 350, 500, 750, 1000": wandb.Image(wandb_friendly_img)})
 ##
         ##ddim sampling, fast model, 500 steps
         sample_time_list = model.DDIM_Sample(num_imgs=10, steps=500, ret_steps=[0, 10, 15, 20, 25, 30, 40, 50, 80, 100, 200, 300, 500])
