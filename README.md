@@ -11,13 +11,13 @@ Testing: Transformer diffusion backbone as described in [U-Vit paper](https://ar
 
 ![image](wandb/ddpm_result.png)
 
-[wandb logs for the ViT run](https://wandb.ai/xhinrichsen/U-VIT-S-2%20Unconditional%20Cifar10/overview?workspace=user-xhinrichsen)
+[wandb logs for the ViT run](https://wandb.ai/xhinrichsen/U-VIT-S-2%20Unconditional%20Cifar10/workspace?workspace=user-xhinrichsen)
 
 Control: U-Net diffusion backbone as described in the original [DDPM Paper](https://arxiv.org/abs/2006.11239)
 
 ![image](wandb/unet_ddpm_result.png)
 
-[wandb logs for the U-Net run](https://wandb.ai/xhinrichsen/DDIM,%20cosine%20beta%20schedule,%20clamping%20x0%20preds%20to%20[-1,1]/overview?workspace=user-xhinrichsen)
+[wandb logs for the U-Net run](https://wandb.ai/xhinrichsen/DDIM,%20cosine%20beta%20schedule,%20clamping%20x0%20preds%20to%20[-1,1]/workspace?workspace=user-xhinrichsen)
 
 
 ### \# Todo: implement FID and IS:
