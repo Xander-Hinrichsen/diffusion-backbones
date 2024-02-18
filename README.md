@@ -21,12 +21,12 @@ Control: U-Net diffusion backbone as described in the original [DDPM Paper](http
 
 
 ### \# Todo: implement FID and IS:
- - note testing FID and IS is a computationally heavy task - as it required generating tens of thousands of images
+ - note testing FID and IS is a computationally heavy task - as it requires generating tens of thousands of images
 
 ### Notes: 
 ViT Pros and cons: \
 Pros:
-  - vit has better performance
+  - vit has better visual performance
   - better understanding of semantics due to global attention mechanism
 
 Cons:
