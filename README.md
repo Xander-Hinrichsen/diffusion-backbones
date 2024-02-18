@@ -18,3 +18,18 @@ Control: U-Net diffusion backbone as described in the original [DDPM Paper](http
 ![image](wandb/unet_ddpm_result.png)
 
 [wandb logs for the U-Net run](https://wandb.ai/xhinrichsen/DDIM,%20cosine%20beta%20schedule,%20clamping%20x0%20preds%20to%20[-1,1]/overview?workspace=user-xhinrichsen)
+
+
+### \# Todo: implement FID and IS:
+ - note testing FID and IS is a computationally heavy task - as it required generating tens of thousands of images
+
+### Notes: 
+ViT Pros and cons: \
+Pros:
+  - vit has better performance
+  - better understanding of semantics due to global attention mechanism
+
+Cons:
+  - more parameters for equal depth in comparison to U-Net
+  - quadratic inference and training time wrt the patch size
+  - quality of generated images greatly decreases as patch size increases past 4x4 (at least for these 32x32 image experiments)
